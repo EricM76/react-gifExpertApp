@@ -254,9 +254,10 @@ AddCategory.propTypes = {
 - La función `handleInputChange` setea el estado de *inputValue* con el valor ingresado en el input
 - La función `handleSubmit` le pasará al método `setCategories` el valor de *inputValue*.
 - Como no recibo las categorias, paso la información en un callbacks, insertando como primer valor del array el *inputValue* y luego utilizando *_spreed operator_* las categorias
-## Deploy
+## Deploy en GitPages
 - Ejecutar el comando `yarn build` o `npm run build`
 - Esto creará la carpeta *build* la cual contiene todos los archivos necesarios para deployar
+- Renombrar la carpeta *build* por *docs* para facilitarle a GitHub para deployar el proyecto
 ### Pruebas en local
 - Instalar el paquete **http-server** con el siguiente comando `npm install --global http-server`
 - Una vez instalado posicionar la terminal en la carpeta *build* y teclear `http-server -o` para levantar el servidor. Esto abrirá el navegador en la ip 127.0.0.0:8080 
