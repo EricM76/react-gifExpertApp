@@ -1,70 +1,262 @@
-# Getting Started with Create React App
+# Curso de React (Hooks y MERN) - Fernado Herrera
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## SECCIÓN 4: Primeros pasos en React
 
-## Available Scripts
+## ¿Qué aprenderemos en esta sección?
 
-In the project directory, you can run:
+- Custom Hooks
+- Fetch hacia un API
+- Comunicación entre componentes
+- Clases de CSS
+- Animaciones
+- Enviar métodos como argumentos
+- Crear listados
+- keys
+- Giphy
+- Deploy del proyecto en gitPages
 
-### `yarn start`
+_Esta es una aplicación pequeña pero muy ilustrativa que explica cómo utilizar React + customHooks para poder resolver necesidades en específico que podremos re-utilizar después._
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Recursos
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+- [Giphy]('https://developers.giphy.com/)
+- [Animate.css]('https://animate.style/)
+- [GitHub]('https://github.com/)
 
-### `yarn test`
+## Documentación
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- [Estructura de archivos]('https://es.reactjs.org/docs/faq-structure.html')
+- [Structuring projects and naming components in React]('https://hackernoon.com/structuring-projects-and-naming-components-in-react-1261b6e18d76)
+- [Servidor para montar un localhost](https://www.npmjs.com/package/http-server)
+- [Configuracioń de credenciales en local]('https://docs.github.com/en/enterprise/2.13/user/articles/setting-your-username-in-git)
 
-### `yarn build`
+## Procedimiento
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 1. Crear el componente _GifGridItem_
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```
+export const GifGridItem = ({title,url}) => {
+    return (
+        <div>
+            <img src={url} alt={title} />
+            <p>{title}</p>
+        </div>
+    )
+}
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- Este componente recibe _title y url_ como **props**
 
-### `yarn eject`
+### 2. Crear el componente _GifGrid_
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```
+import { useFetchGifs } from '../hooks/useFetchGifs';
+import { GifGridItem } from './GifGridItem';
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+export const GifGrid = ({ category }) => {
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+    const {data:images,loading} = useFetchGifs(category);
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+    return (
+        <>
+        <h3>{category}</h3>
 
-## Learn More
+        {loading && <p>loading</p>}
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+        <div className="card-grid">
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+            {
+                images.map(image => (
+                    <GifGridItem
+                    key = {image.id}
+                    {...image}
+                    />
+                ))
+            }
+        </div>
+        </>
+    )
+}
 
-### Code Splitting
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- Este componente recibe como **props** la categoría buscada, que a su vez la pasa por parámetro al **custom hook** **useFetchGifs**
+- **useFetchGifs** devuelve _data_ y _loading_. En la desestructuración se renombra data por images `const {data:images,loading} = useFetchGifs(category);` para guardar coherencia.
+- Si _loading_ es true se mostrará en pantalla **_loading_**
+- Cuando el **useFetchGifs** devuelva la información en data, se recorrerá con map utilizando el componente _GifGridItem_ pasándole por **props** todas las propiedades de cada image `{...image}`
 
-### Analyzing the Bundle Size
+```
+    { 
+        images.map(image => (
+            <GifGridItem
+            key = {image.id}
+            {...image}
+            />
+        ))
+    }
+```
+### 3. Crear el custom hook *useFetchGifs*
+~~~
+import { useState, useEffect } from "react";
+import { getGif } from '../helpers/getGifs';
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
 
-### Making a Progressive Web App
+export const useFetchGifs = (category) => {
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+    const [state, setState] = useState({
+        data : [],
+        loading : true
+    })
+    
+    useEffect(() => {
+        getGif(category)
+            .then( images => {
+                setState({
+                    data : images,
+                    loading : false
+                })
+            })
+    }, [category])
 
-### Advanced Configuration
+    return state
+}
+~~~
+- Importo **useState** y **useEffect** de react.
+- Se inicializa el estado de este hook con un objeto con las propiedades *data* con un array vacío como valor y *loading* con valor true.
+~~~
+ const [state, setState] = useState({
+        data : [],
+        loading : true
+    })
+~~~
+- Importo el helper **getGifs** que hará la consulta a la API
+- *useFetchGifs* recibe como parámetro la categoría buscada para ser usada como parámetro del helper **getGif**
+- Utilizo useEffect para ejecutar **getGif** cuando la categoría cambie de valor.
+- Como **getGif** es una promesa, esta traerá la información que devuelve la API 
+- Con la inforamcioń seteo el estado con `setState`.
+~~~
+    useEffect(() => {
+        getGif(category)
+            .then( images => {
+                setState({
+                    data : images,
+                    loading : false
+                })
+            })
+    }, [category])
+~~~
+### 4. Crear el helper *getGif*
+~~~
+    try {
+        const url = `https://api.giphy.com/v1/gifs/search?api_key=bWo4v44iCpufFV5TQfL4zwsKdTHwBPUg&q=${category}&limit=10`;
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+        const response = await fetch(url);
+        const { data } = await response.json();
+    
+        const gifts = data.map(img => {
+            return {
+                id: img.id,
+                title: img.title,
+                url: img.images?.downsized_medium.url
+            }
+        })
+    
+        return gifts
+    } catch (error) {
+        console.log(error)
+        return []
+    }
+~~~
+- Este helper es una función asincrónica que recibe como parámetro la categoría buscada
+- Hace la petición a la API, extrayendo de la respuesta solo la información necesaria (id, title y url)
+- Si el objeto tiene *images* trae el valor de la propiedad *downsized_medium*
+- Ua vez creado el array con la información necesaria lo retorna para ser usado por el *custom hook*
+### 5. Crear un componente llamado _GifExpertAdd_
 
-### Deployment
+```
+import React, { useState } from 'react'
+import { AddCategory } from './components/AddCategory';
+import { GifGrid } from './components/GifGrid';
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+export default function GifExpertApp() {
 
-### `yarn build` fails to minify
+    const [categories, setCategories] = useState([]);
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+    return (
+        <>
+            <h2>GifExpertApp</h2>
+
+            {/* envío la referencia al componente hijo de la función setCategories */}
+            <AddCategory setCategories={setCategories} />
+            <hr />
+
+            <ol>
+                {
+                    categories.map((category, index) => (
+                        <GifGrid 
+                        key = {category}
+                        category = {category}
+                        />
+                    ))
+                }
+            </ol>
+        </>
+    )
+}
+
+```
+- Importo *useState* para inicializar categories con un array vacío (o con un valor inicial)
+- Envío como referencia al componente **AddCateory** la función `setCategories` para que cuando reciba una categoría setee el estado inicial de *categories*
+- Una vez recibida la informacioń esta se mapea pasándole al componente **GifGrid** la *category*
+### 6. Crear el componente _AddCategory_
+~~~
+import React, { useState } from 'react';
+
+import PropTypes from 'prop-types';
+
+export const AddCategory = ({ setCategories }) => {
+
+    const [inputValue, setinputValue] = useState('');
+
+    const handleInputChange = e => {
+        setinputValue(e.target.value)
+    }
+
+    /* puedo llamar a método setCategories pasandole como argumento un callback */
+    const handleSubmit = e => {
+        e.preventDefault();
+
+        if(inputValue.trim().length > 2){
+            /* primero inserto lo agregado y luego muestro lo existente*/
+            setCategories(categories => [inputValue, ...categories]);
+            setinputValue('')
+        }
+    }
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <input
+                type="text"
+                value={inputValue}
+                onChange={handleInputChange}
+            />
+        </form>
+    )
+}
+
+AddCategory.propTypes = {
+    setCategories : PropTypes.func.isRequired
+}
+
+~~~
+- Importo *useState* para inicializar *inputValue* con un string vacío para evitar que sea undefined
+- Este componente tiene un formulario con un input. El formulario tiene el evento *onSubmit* que ejecutará la función `handleSubmit` y el input el evento *onChange* que ejecutará el función `handleInputChange`
+- La función `handleInputChange` setea el estado de *inputValue* con el valor ingresado en el input
+- La función `handleSubmit` le pasará al método `setCategories` el valor de *inputValue*.
+- Como no recibo las categorias, paso la información en un callbacks, insertando como primer valor del array el *inputValue* y luego utilizando *_spreed operator_* las categorias
+## Deploy
+- Ejecutar el comando `yarn build` o `npm run build`
+- Esto creará la carpeta *build* la cual contiene todos los archivos necesarios para deployar
+### Pruebas en local
+- Instalar el paquete **http-server** con el siguiente comando `npm install --global http-server`
+- Una vez instalado posicionar la terminal en la carpeta *build* y teclear `http-server -o` para levantar el servidor. Esto abrirá el navegador en la ip 127.0.0.0:8080 
