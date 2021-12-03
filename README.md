@@ -254,10 +254,28 @@ AddCategory.propTypes = {
 - La función `handleInputChange` setea el estado de *inputValue* con el valor ingresado en el input
 - La función `handleSubmit` le pasará al método `setCategories` el valor de *inputValue*.
 - Como no recibo las categorias, paso la información en un callbacks, insertando como primer valor del array el *inputValue* y luego utilizando *_spreed operator_* las categorias
-## Deploy en GitPages
+## Deploy en GitHubPages
 - Ejecutar el comando `yarn build` o `npm run build`
 - Esto creará la carpeta *build* la cual contiene todos los archivos necesarios para deployar
 - Renombrar la carpeta *build* por *docs* para facilitarle a GitHub para deployar el proyecto
+- Editar el archivo *index.html* anteponiendo un **./** en todos los href, dado que por defecto busca la información en la carpeta raíz del proyecto
+~~~
+<head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="./favicon.ico" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Web site created using create-react-app" />
+    <link rel="apple-touch-icon" href="./logo192.png" />
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <title>Expert App</title>
+    <link href="./static/css/main.da222b47.chunk.css" rel="stylesheet">
+</head>
+~~~
+- Subir el proyecto a un repositorio público creado en GitHub
+- Acceder a GitHub/setting/pages
+- Seleccionar en Souce la rama *master*, la carpeta */docs* y salvar los cambios
 ### Pruebas en local
 - Instalar el paquete **http-server** con el siguiente comando `npm install --global http-server`
 - Una vez instalado posicionar la terminal en la carpeta *build* y teclear `http-server -o` para levantar el servidor. Esto abrirá el navegador en la ip 127.0.0.0:8080 
